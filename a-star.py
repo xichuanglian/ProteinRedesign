@@ -9,7 +9,7 @@ class TreeNode:
     def __lt__(self,other):
         return (self.g + self.h) < (other.g + other.h)
 
-def calc_g(nodes_above, rotamer, old_g, data):
+def calc_g(nodes_above, old_g, data):
     pass
 
 def calc_h(nodes_above, data):
@@ -22,8 +22,8 @@ def astar_search(residue_num, residues, data):
     while len(current.nodes) < depth:
         resi = len(current.nodes)
         for rotamer in residues[resi].rotamers:
-            g = calc_g(current.nodes, rotamer, current.g, data)
             new_nodes = current.nodes + [rotamer]
+            g = calc_g(new_nodes, current.g, data)
             h = calc_h(new_nodes, data)
             heappush(heap, TreeNode(new_nodes,g,h))
         current = heappop(heap)
