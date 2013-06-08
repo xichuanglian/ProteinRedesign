@@ -56,19 +56,45 @@ int get_rotamer_num(const int* rotamer_num, const int idx)
     return rotamer_num[idx];
 }
 
-int find_min_rotamer(const int* rotamers_above, const int d, const int j, const void* data_v)
+float find_min_rotamer(const int* rotamers_above, const int d, const int j, const void* data_v)
 {
-    dataset_s* data = (dataset*) data_v;
-    float** energy = data->energy;
+    dataset_s* data = (dataset_s*) data_v;
+    float** energy = (float**)data->energy;
+
+	// j starts from 0!
 }
 
-int calc_g_delta(const int* rotamers_above, const int d, const void* data_v)
+float calc_g_delta(const int* rotamers_above, const int d, const void* data_v)
 {
-    dataset_s* data = (dataset*) data_v;
+    dataset_s* data = (dataset_s*) data_v;
     float** energy = data->energy;
+
+	// d is the length
+	float deltaG = 0;
+
+	int newRot = rotamer_above[d-1];
+	for (int k = 0; k < d-1; k++)
+	{
+		int theOtherRot = rotamers_above[k];
+		deltaG += energy[k * data->residue_num + (d-1)][theOtherRot * data->rotamer_num[d-1] + newRot];
+	}
+
+	return deltaG;
 }
 
-int calc_h(const int* rotamers_above, const int d, const void* data_v)
+float calc_h(const int* rotamers_above, const int d, const void* data_v)
 {
     dataset_s* data = (dataset*) data_v;
+
+	// d is the length
+	// j starts from 0!
+
+	float valueH = 0;
+	
+	for (j = d; j < data->residue_num; j++)
+	{
+		valueH += find_min_rotamer(rotamers_above, d, j, data_v);
+	}
+
+	return valueH;
 }

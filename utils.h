@@ -20,9 +20,9 @@ int get_rotamer_num(const int* rotamer_num, const int idx);
  * d starts from 1
  * j starts from 0
  */
-int find_min_rotamer(const int* rotamers_above, const int d, const int j, const void* data);
+float find_min_rotamer(const int* rotamers_above, const int d, const int j, const void* data);
 /*
  * calc \sum_{i=0}^{d-1} energy[i_r][d_s]
  */
-int calc_g_delta(const int* rotamers_above, const int d, const void* data);
-int calc_h(const int* rotamers_above, const int d, const void* data);
+float calc_g_delta(const int* rotamers_above, const int d, const void* data);
+float calc_h(const int* rotamers_above, const int d, const void* data);

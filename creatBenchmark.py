@@ -32,7 +32,7 @@ for x in range(0, num):
 		energyTab = [[0 for i in range(rotamerLib[y])] for i in range (rotamerLib[x])]
 		for i in range (0, rotamerLib[x]):
 			for j in range (0, rotamerLib[y]):
-				energy = random.random()*100
+				energy = -random.random()*100
 				energyTab[i][j] = energy
 				fout. write("%f " % energy)
 				
