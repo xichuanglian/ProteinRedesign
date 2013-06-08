@@ -30,7 +30,7 @@ int read_rotamer_lib(const char* file_name, int** rotamer_num_p)
 }
 
 void* read_energy_lib(const char* file_name,
-                      const resi_num, const int* rotamer_num)
+                      const int resi_num, const int* rotamer_num)
 {
     FILE* file = fopen(file_name, "r");
     float** energy = malloc(resi_num * sizeof(float*));
@@ -41,7 +41,7 @@ void* read_energy_lib(const char* file_name,
 
     int a,b;
     while (fscanf(file,"%d %d",&a,&b)) {
-        float* et = eneray[a*n + b];
+        float* et = energy[a*resi_num + b];
         int m = rotamer_num[a] * rotamer_num[b];
         for (i = 0; i < m; ++i)
             fscanf(file,"%f",&et[i]);
@@ -51,24 +51,24 @@ void* read_energy_lib(const char* file_name,
     return (void*) energy;
 }
 
-int get_rotamer_num(const int* rotamer_num, const idx)
+int get_rotamer_num(const int* rotamer_num, const int idx)
 {
-    return rotamer_num;
+    return rotamer_num[idx];
 }
 
 int find_min_rotamer(const int* rotamers_above, const int d, const int j, const void* data_v)
 {
-    dataset* data = (dataset*) data_v;
+    dataset_s* data = (dataset*) data_v;
     float** energy = data->energy;
 }
 
 int calc_g_delta(const int* rotamers_above, const int d, const void* data_v)
 {
-    dataset* data = (dataset*) data_v;
+    dataset_s* data = (dataset*) data_v;
     float** energy = data->energy;
 }
 
 int calc_h(const int* rotamers_above, const int d, const void* data_v)
 {
-    dataset* data = (dataset*) data_v;
+    dataset_s* data = (dataset*) data_v;
 }

@@ -15,7 +15,7 @@ dataset_s* read_libs(const char* rlib_name, const char* elib_name);
 int read_rotamer_lib(const char* file_name, int** rotamer_num);
 void* read_energy_lib(const char* file_name,
                       const int resi_num, const int* rotamer_num);
-int get_rotamer_num(const int* rotamer_num, const idx);
+int get_rotamer_num(const int* rotamer_num, const int idx);
 /*
  * d starts from 1
  * j starts from 0
