@@ -1,3 +1,5 @@
+import "heapq"
+
 class TreeNode:
     def __init__(self,nodes,g,h):
         self.nodes = nodes
@@ -10,7 +12,7 @@ def calc_g(nodes_above, rotamer, old_g):
 def calc_h(nodes_above):
     pass
 
-def astar_search(residue_num):
+def astar_search(residue_num, rotamers):
     depth = residue_num
     heap = []
     current = TreeNode([],0,0)
@@ -20,6 +22,6 @@ def astar_search(residue_num):
             g = calc_g(current.nodes, rotamer, current.g)
             new_nodes = current.nodes + [rotamer]
             h = calc_h(new_nodes)
-            heap.push(TreeNode(new_nodes,g,h))
-        current = heap.pop()
+            heappush(heap, TreeNode(new_nodes,g,h))
+        current = heappop(heap)
     return current.nodes
