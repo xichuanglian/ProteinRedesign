@@ -61,7 +61,7 @@ float find_min_rotamer(const int* rotamers_above, const int d, const int j, cons
     dataset_s* data = (dataset_s*) data_v;
     float** energy = (float**)data->energy;
 
-	// j starts from 0!
+	// j starts from 0! 
 }
 
 float calc_g_delta(const int* rotamers_above, const int d, const void* data_v)
