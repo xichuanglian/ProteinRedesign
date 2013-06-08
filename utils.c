@@ -2,6 +2,14 @@
 #include <stdlib.h>
 #include "utils.h"
 
+dataset_s* read_libs(const char* rlib_name, const char* elib_name)
+{
+    dataset_s* data = malloc(sizeof(dataset_s));
+    data->residue_num = read_rotamer_lib(rlib_name, &(data->rotamer_num));
+    data->energy = read_energy_lib(elib_name, data->residue_num, data->rotamer_num);
+    return data;
+}
+
 int read_rotamer_lib(const char* file_name, int** rotamer_num_p)
 {
     FILE* file = fopen(file_name, "r");
@@ -46,4 +54,21 @@ void* read_energy_lib(const char* file_name,
 int get_rotamer_num(const int* rotamer_num, const idx)
 {
     return rotamer_num;
+}
+
+int find_min_rotamer(const int* rotamers_above, const int d, const int j, const void* data_v)
+{
+    dataset* data = (dataset*) data_v;
+    float** energy = data->energy;
+}
+
+int calc_g_delta(const int* rotamers_above, const int d, const void* data_v)
+{
+    dataset* data = (dataset*) data_v;
+    float** energy = data->energy;
+}
+
+int calc_h(const int* rotamers_above, const int d, const void* data_v)
+{
+    dataset* data = (dataset*) data_v;
 }

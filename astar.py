@@ -10,6 +10,7 @@ class TreeNode:
         return (self.g + self.h) < (other.g + other.h)
 
 def astar_search(num_proc, data):
+    depth = data.residue_num()
     heap = [TreeNode([],0,0)]
     finished = False
     ans = []
@@ -27,10 +28,7 @@ def astar_search(num_proc, data):
                     prepare.append((current.nodes + [rotamer], current.g))
         if not finished:
             for nodes,old_g in prepare:
-                g = data.calc_g(nodes, old_g)
-                h = data.calc_h(nodes )
+                g = data.calc_g_delta(nodes, old_g) + old_g
+                h = data.calc_h(nodes)
                 heappush(heap, TreeNode(nodes,g,h))
     return ans
-
-
-
