@@ -1,5 +1,4 @@
-import "heapq"
-import "dataset"
+import heapq
 
 class TreeNode:
     def __init__(self,nodes,g,h):
@@ -12,23 +11,22 @@ class TreeNode:
 def astar_search(num_proc, data):
     depth = data.residue_num()
     heap = [TreeNode([],0,0)]
-    finished = False
     ans = []
-    while not finished:
+    ans_value = 1
+    while heap[0].g < ans_value:
         prepare = []
         while len(prepare) < num_proc and len(heap > 0):
-            current = heappop(heap)
+            current = heapq.heappop(heap)
             if len(current.nodes) >= depth:
-                finished = True
-                ans = current.nodes
-                break
+                if current.g < ans_value:
+                    ans_value = current.g
+                    ans = current.nodes
             else:
                 resi = len(current.nodes)
                 for rotamer in range(data.rotamer_num(resi)):
                     prepare.append((current.nodes + [rotamer], current.g))
-        if not finished:
             for nodes,old_g in prepare:
                 g = data.calc_g_delta(nodes, old_g) + old_g
                 h = data.calc_h(nodes)
-                heappush(heap, TreeNode(nodes,g,h))
+                heapq.heappush(heap, TreeNode(nodes,g,h))
     return ans
