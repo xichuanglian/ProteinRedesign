@@ -7,6 +7,7 @@ class TreeNode:
         self.h = h
 
 def calc_g(nodes_above, rotamer, old_g):
+	print "hello world!"
     pass
 
 def calc_h(nodes_above):
