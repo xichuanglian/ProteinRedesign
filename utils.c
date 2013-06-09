@@ -65,22 +65,25 @@ float find_min_rotamer(const int* rotamers_above, const int d, const int j, cons
 
 	float minSum = 1000000000;
 
+        int i,k,s;
+
 	for (s = 0; s < data->rotamer_num[j]; s++)
 	{
 		float sum = 0;
 
 		// 1st term in the min()
-		for (int i = 0; i < d; i++)
+		for (i = 0; i < d; i++)
 		{
 			int r = rotamers_above[i];
 			sum += energy[i * data->residue_num + j][r * data->rotamer_num[j] + s];
 		}
 		
 		// 2nd term in the min()
-		for (int k = j; k < data->residue_num; k++)
+		for (k = j; k < data->residue_num; k++)
 		{
+                        int u;
 			float minSubSum = 1000000000;
-			for (int u = 0; u < data->rotamer_num[k]; u++)
+			for (u = 0; u < data->rotamer_num[k]; u++)
 			{
 				float energyJK = energy[j * data->residue_num + k][s * data->rotamer_num[k] + u];
 
@@ -107,8 +110,9 @@ float calc_g_delta(const int* rotamers_above, const int d, const void* data_v)
 	// d is the length
 	float deltaG = 0;
 
-	int newRot = rotamer_above[d-1];
-	for (int k = 0; k < d-1; k++)
+	int newRot = rotamers_above[d-1];
+        int k;
+	for (k = 0; k < d-1; k++)
 	{
 		int theOtherRot = rotamers_above[k];
 		deltaG += energy[k * data->residue_num + (d-1)][theOtherRot * data->rotamer_num[d-1] + newRot];
@@ -119,12 +123,13 @@ float calc_g_delta(const int* rotamers_above, const int d, const void* data_v)
 
 float calc_h(const int* rotamers_above, const int d, const void* data_v)
 {
-    dataset_s* data = (dataset*) data_v;
+    dataset_s* data = (dataset_s*) data_v;
 
 	// d is the length
 	// j starts from 0!
 
 	float valueH = 0;
+        int j;
 	
 	for (j = d; j < data->residue_num; j++)
 	{
