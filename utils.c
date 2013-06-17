@@ -2,16 +2,18 @@
 #include <stdlib.h>
 #include "utils.h"
 
-dataset_s* read_libs(const char* rlib_name, const char* elib_name)
+dataset_s read_libs(const char* rlib_name, const char* elib_name)
 {
-    dataset_s* data = malloc(sizeof(dataset_s));
-    data->residue_num = read_rotamer_lib(rlib_name, &(data->rotamer_num));
-    data->energy = read_energy_lib(elib_name, data->residue_num, data->rotamer_num);
+    //dataset_s data = malloc(sizeof(dataset_s));
+    dataset_s data;
+    data.residue_num = read_rotamer_lib(rlib_name, &(data.rotamer_num));
+    data.energy = read_energy_lib(elib_name, data.rotamer_num);
     return data;
 }
 
 int read_rotamer_lib(const char* file_name, int** rotamer_num_p)
 {
+    printf("read rotamer lib begin\n");
     FILE* file = fopen(file_name, "r");
 
     // read the number of residues
@@ -26,21 +28,26 @@ int read_rotamer_lib(const char* file_name, int** rotamer_num_p)
         fscanf(file, "%d", &rn[i]);
 
     fclose(file);
+    printf("read rotamer lib end\n");
     return n;
 }
 
-void* read_energy_lib(const char* file_name,
-                      const int resi_num, const int* rotamer_num)
+void* read_energy_lib(const char* file_name, const int* rotamer_num)
 {
+    printf("read energy lib begin\n");
     FILE* file = fopen(file_name, "r");
-    float** energy = malloc(resi_num * sizeof(float*));
 
-    int i;
+    int resi_num;
+    fscanf(file, "%d", &resi_num);
+    float** energy = malloc(resi_num * resi_num * sizeof(float*));
+
+    int i,j;
     for (i = 0; i < resi_num; ++i)
-        energy[i] = malloc(rotamer_num[i] * FLOAT_SIZE);
+        for (j = 0; j < resi_num; ++j)
+            energy[i * resi_num + j] = malloc(rotamer_num[i] * rotamer_num[j] * FLOAT_SIZE);
 
     int a,b;
-    while (fscanf(file,"%d %d",&a,&b)) {
+    while (fscanf(file,"%d %d",&a,&b) != EOF) {
         float* et = energy[a*resi_num + b];
         int m = rotamer_num[a] * rotamer_num[b];
         for (i = 0; i < m; ++i)
@@ -48,6 +55,7 @@ void* read_energy_lib(const char* file_name,
     }
 
     fclose(file);
+    printf("read energy lib end\n");
     return (void*) energy;
 }
 
@@ -58,6 +66,8 @@ int get_rotamer_num(const int* rotamer_num, const int idx)
 
 float find_min_rotamer(const int* rotamers_above, const int d, const int j, const void* data_v)
 {
+    //printf("find min rotamer begin\n");
+
     dataset_s* data = (dataset_s*) data_v;
     float** energy = (float**)data->energy;
 
@@ -65,7 +75,7 @@ float find_min_rotamer(const int* rotamers_above, const int d, const int j, cons
 
     float minSum = 1000000000;
 
-        int i,k,s;
+    int i,k,s;
 
     for (s = 0; s < data->rotamer_num[j]; s++)
     {
@@ -81,7 +91,7 @@ float find_min_rotamer(const int* rotamers_above, const int d, const int j, cons
         // 2nd term in the min()
         for (k = j; k < data->residue_num; k++)
         {
-                        int u;
+            int u;
             float minSubSum = 1000000000;
             for (u = 0; u < data->rotamer_num[k]; u++)
             {
@@ -99,6 +109,7 @@ float find_min_rotamer(const int* rotamers_above, const int d, const int j, cons
             minSum = sum;
     }
 
+    //printf("find min rotamer end\n");
     return minSum;
 }
 
@@ -111,7 +122,7 @@ float calc_g_delta(const int* rotamers_above, const int d, const void* data_v)
     float deltaG = 0;
 
     int newRot = rotamers_above[d-1];
-        int k;
+    int k;
     for (k = 0; k < d-1; k++)
     {
         int theOtherRot = rotamers_above[k];
@@ -129,7 +140,7 @@ float calc_h(const int* rotamers_above, const int d, const void* data_v)
     // j starts from 0!
 
     float valueH = 0;
-        int j;
+    int j;
 
     for (j = d; j < data->residue_num; j++)
     {

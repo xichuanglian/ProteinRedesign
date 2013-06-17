@@ -10,11 +10,10 @@ typedef struct dataset_S{
     void* energy;
 } dataset_s;
 
-dataset_s* read_libs(const char* rlib_name, const char* elib_name);
+dataset_s read_libs(const char* rlib_name, const char* elib_name);
 
 int read_rotamer_lib(const char* file_name, int** rotamer_num);
-void* read_energy_lib(const char* file_name,
-                      const int resi_num, const int* rotamer_num);
+void* read_energy_lib(const char* file_name, const int* rotamer_num);
 int get_rotamer_num(const int* rotamer_num, const int idx);
 /*
  * d starts from 1
