@@ -31,7 +31,7 @@ def astar_search(num_proc, data, spark_context):
                     ans = current.nodes
             else:
                 resi = len(current.nodes)
-                for rotamer in range(data.rotamer_num(resi)):
+                for rotamer in range(data.rotamer_num[resi]):
                     prepare.append((current.nodes + [rotamer], current.g))
         if num_proc <= 1:
             for nodes,old_g in prepare:
