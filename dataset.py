@@ -2,9 +2,9 @@ from ctypes import *
 
 class Dataset:
     def __init__(self, rlib_name, elib_name):
-        self.lib = cdll.LoadLibrary("./utils.so")
-        self.lib.calc_g_delta.restype = c_float
-        self.lib.calc_h.restype = c_float
+        #self.lib = cdll.LoadLibrary("./utils.so")
+        #self.lib.calc_g_delta.restype = c_float
+        #self.lib.calc_h.restype = c_float
 
         # read the number of rotamers for each residue
         rlib_file = open(rlib_name)
@@ -33,16 +33,27 @@ class Dataset:
             s += len(nums)
         elib_file.close()
 
-        self.rotamer_num_c = (c_int * self.residue_num)(*self.rotamer_num)
-        self.offset_c = (c_int * len(self.offset))(*self.offset)
-        self.energy_c = (c_float * len(self.energy))(*self.energy)
+        #self.rotamer_num_c = (c_int * self.residue_num)(*self.rotamer_num)
+        #self.offset_c = (c_int * len(self.offset))(*self.offset)
+        #self.energy_c = (c_float * len(self.energy))(*self.energy)
 
     def calc_g_delta(self, nodes):
+        lib = cdll.LoadLibrary("./utils.so")
+        lib.calc_g_delta.restype = c_float
         nodes_c = (c_int * len(nodes))(*nodes)
-        return self.lib.calc_g_delta(byref(nodes_c), len(nodes), self.residue_num,
-                                     byref(self.rotamer_num_c), byref(self.offset_c), byref(self.energy_c))
+        rotamer_num_c = (c_int * self.residue_num)(*self.rotamer_num)
+        offset_c = (c_int * len(self.offset))(*self.offset)
+        energy_c = (c_float * len(self.energy))(*self.energy)
+        return lib.calc_g_delta(byref(nodes_c), len(nodes), self.residue_num,
+                                     byref(rotamer_num_c), byref(offset_c), byref(energy_c))
 
     def calc_h(self, nodes):
+        lib = cdll.LoadLibrary("./utils.so")
+        lib.calc_h.restype = c_float
         nodes_c = (c_int * len(nodes))(*nodes)
-        return self.lib.calc_h(byref(nodes_c), len(nodes), self.residue_num,
-                               byref(self.rotamer_num_c), byref(self.offset_c), byref(self.energy_c))
+        rotamer_num_c = (c_int * self.residue_num)(*self.rotamer_num)
+        offset_c = (c_int * len(self.offset))(*self.offset)
+        energy_c = (c_float * len(self.energy))(*self.energy)
+        nodes_c = (c_int * len(nodes))(*nodes)
+        return lib.calc_h(byref(nodes_c), len(nodes), self.residue_num,
+                               byref(rotamer_num_c), byref(offset_c), byref(energy_c))

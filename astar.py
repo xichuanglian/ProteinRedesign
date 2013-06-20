@@ -13,6 +13,8 @@ class TreeNode:
 def astar_search(num_proc, data, spark_context):
     def process_prepare(pair):
         nodes,old_g = pair
+        #g = b_data.value.calc_g_delta(nodes) + old_g
+        #h = b_data.value.calc_h(nodes)
         g = data.calc_g_delta(nodes) + old_g
         h = data.calc_h(nodes)
         return TreeNode(nodes,g,h)
@@ -21,6 +23,8 @@ def astar_search(num_proc, data, spark_context):
     heap = [TreeNode([],0,0)]
     ans = []
     ans_value = 1
+    if num_proc > 1:
+        b_data = spark_context.broadcast(data)
     while heap[0].g < ans_value:
         prepare = []
         while len(prepare) < num_proc and len(heap) > 0:
