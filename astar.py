@@ -11,11 +11,13 @@ class TreeNode:
         return str(self.nodes) + "g:%d h: %d" %(self.g, self.h)
 
 def astar_search(num_proc, data, spark_context):
-    def process_prepare(pair):
-        nodes,old_g = pair
-        g = data.calc_g_delta(nodes) + old_g
-        h = data.calc_h(nodes)
-        return TreeNode(nodes,g,h)
+	def process_prepare(pairs):
+		nodes = []
+		for nodes, old_g in pairs:
+        	g = data.calc_g_delta(nodes) + old_g
+        	h = data.calc_h(nodes)
+        	nodes.append(TreeNode(nodes,g,h))
+		return nodes
 
     depth = data.residue_num
     heap = [TreeNode([],0,0)]
@@ -23,6 +25,9 @@ def astar_search(num_proc, data, spark_context):
     ans_value = 1
     while heap[0].g < ans_value:
         prepare = []
+		# the old vector prepare is divided into several subsets
+		int subSetSize = 2
+
         while len(prepare) < num_proc and len(heap) > 0:
             current = heapq.heappop(heap)
             if len(current.nodes) >= depth:
@@ -39,8 +44,24 @@ def astar_search(num_proc, data, spark_context):
                 h = data.calc_h(nodes)
                 heapq.heappush(heap, TreeNode(nodes,g,h))
         else:
-            prepare_p = spark_context.parallelize(prepare)
-            nodes = prepare_p.map(process_prepare).collect()
-            for node in nodes:
-                heapq.heappush(heap, node)
+			# regroup the vector prepare
+			prepareNew = []
+			temp = []
+			int counter = 0
+			for nodes, old_g in prepare:
+				temp.append((nodes, old_g))
+				counter++
+				if counter == subSetSize:
+					prepareNew.append(temp)
+					temp = []
+					counter = 0
+			
+			if not temp
+				prepareNew.append(temp)
+			
+            prepare_p = spark_context.parallelize(prepareNew)
+            groupOfNodes = prepare_p.map(process_prepare).collect()
+            for nodes in groupOfNodes:
+				for node in nodes
+                	heapq.heappush(heap, node)
     return ans
