@@ -13,10 +13,8 @@ class TreeNode:
 def astar_search(num_proc, data, spark_context):
     def process_prepare(pair):
         nodes,old_g = pair
-        #g = b_data.value.calc_g_delta(nodes) + old_g
-        #h = b_data.value.calc_h(nodes)
-        g = data.calc_g_delta(nodes) + old_g
-        h = data.calc_h(nodes)
+        g = b_data.value.calc_g_delta(nodes) + old_g
+        h = b_data.value.calc_h(nodes)
         return TreeNode(nodes,g,h)
 
     depth = data.residue_num
