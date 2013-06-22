@@ -64,12 +64,11 @@ int get_rotamer_num(const int* rotamer_num, const int idx)
     return rotamer_num[idx];
 }
 
-float find_min_rotamer(const int* rotamers_above, const int d, const int j, const void* data_v)
+float find_min_rotamer(const int* rotamers_above, const int d, const int j,
+                       const int residue_num, const int* rotamer_num,
+                       const int* offset, const float* energy)
 {
     //printf("find min rotamer begin\n");
-
-    dataset_s* data = (dataset_s*) data_v;
-    float** energy = (float**)data->energy;
 
     // j starts from 0! 
 
@@ -77,7 +76,7 @@ float find_min_rotamer(const int* rotamers_above, const int d, const int j, cons
 
     int i,k,s;
 
-    for (s = 0; s < data->rotamer_num[j]; s++)
+    for (s = 0; s < rotamer_num[j]; s++)
     {
         float sum = 0;
 
@@ -85,17 +84,21 @@ float find_min_rotamer(const int* rotamers_above, const int d, const int j, cons
         for (i = 0; i < d; i++)
         {
             int r = rotamers_above[i];
-            sum += energy[i * data->residue_num + j][r * data->rotamer_num[j] + s];
+            //sum += energy[i * data->residue_num + j][r * data->rotamer_num[j] + s];
+            int os = offset[i * residue_num + j];
+            sum += energy[os + r * rotamer_num[j] + s];
         }
 
         // 2nd term in the min()
-        for (k = j; k < data->residue_num; k++)
+        for (k = j; k < residue_num; k++)
         {
             int u;
             float minSubSum = 1000000000;
-            for (u = 0; u < data->rotamer_num[k]; u++)
+            for (u = 0; u < rotamer_num[k]; u++)
             {
-                float energyJK = energy[j * data->residue_num + k][s * data->rotamer_num[k] + u];
+                //float energyJK = energy[j * data->residue_num + k][s * data->rotamer_num[k] + u];
+                int os = offset[j * residue_num + k];
+                float energyJK = energy[os + s * rotamer_num[k] + u];
 
                 if (energyJK < minSubSum)
                     minSubSum = energyJK;
@@ -113,11 +116,10 @@ float find_min_rotamer(const int* rotamers_above, const int d, const int j, cons
     return minSum;
 }
 
-float calc_g_delta(const int* rotamers_above, const int d, const void* data_v)
+float calc_g_delta(const int* rotamers_above, const int d,
+                   const int residue_num, const int* rotamer_num,
+                   const int* offset, const float* energy)
 {
-    dataset_s* data = (dataset_s*) data_v;
-    float** energy = data->energy;
-
     // d is the length
     float deltaG = 0;
 
@@ -126,25 +128,29 @@ float calc_g_delta(const int* rotamers_above, const int d, const void* data_v)
     for (k = 0; k < d-1; k++)
     {
         int theOtherRot = rotamers_above[k];
-        deltaG += energy[k * data->residue_num + (d-1)][theOtherRot * data->rotamer_num[d-1] + newRot];
+        //deltaG += energy[k * data->residue_num + (d-1)][theOtherRot * data->rotamer_num[d-1] + newRot];
+        int os = offset[k * residue_num + (d-1)];
+        deltaG += energy[os + theOtherRot * rotamer_num[d-1] + newRot];
     }
 
     return deltaG;
 }
 
-float calc_h(const int* rotamers_above, const int d, const void* data_v)
+float calc_h(const int* rotamers_above, const int d,
+             const int residue_num, const int* rotamer_num,
+             const int* offset, const float* energy)
 {
-    dataset_s* data = (dataset_s*) data_v;
-
     // d is the length
     // j starts from 0!
 
     float valueH = 0;
     int j;
 
-    for (j = d; j < data->residue_num; j++)
+    for (j = d; j < residue_num; j++)
     {
-        valueH += find_min_rotamer(rotamers_above, d, j, data_v);
+        valueH += find_min_rotamer(rotamers_above, d, j,
+                                   residue_num, rotamer_num,
+                                   offset, energy);
     }
 
     return valueH;

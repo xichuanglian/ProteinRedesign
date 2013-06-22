@@ -1,14 +1,15 @@
 import random
+import sys
 
 # rotamer library
 fout = open('rotamerLibrary', 'w')
 
-num = 10
+num = int(sys.argv[1])
 fout.write("%d\n" % num)
 
 rotamerLib = []
-for x in range(0, 10):
-    numRot = random.randrange(2,5,1)
+for x in range(0, num):
+    numRot = random.randrange(2,3,1)
     rotamerLib.append(numRot)
     fout.write("%d " % numRot)
 
@@ -29,7 +30,7 @@ for x in range(0, num):
         # output (x, y)
         fout.write("%d %d " %(x, y))
 
-        energyTab = [[0 for i in range(rotamerLib[y])] for i in range (rotamerLib[x])]
+        energyTab = [[0 for i in range(rotamerLib[y])] for j in range (rotamerLib[x])]
         for i in range (0, rotamerLib[x]):
             for j in range (0, rotamerLib[y]):
                 energy = -random.random()*100

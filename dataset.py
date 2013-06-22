@@ -1,28 +1,59 @@
 from ctypes import *
 
-class c_Dataset_s(Structure):
-    _fields_ = [("residue_num", c_int),
-                ("rotamer_num", POINTER(c_int)),
-                ("energy", c_void_p)]
-
 class Dataset:
     def __init__(self, rlib_name, elib_name):
-        self.lib = cdll.LoadLibrary("./utils.so")
-        self.lib.read_libs.restype = c_Dataset_s
-        self.c_data = self.lib.read_libs(c_char_p(rlib_name), c_char_p(elib_name))
-        self.residue_num = self.c_data.residue_num
+        #self.lib = cdll.LoadLibrary("./utils.so")
+        #self.lib.calc_g_delta.restype = c_float
+        #self.lib.calc_h.restype = c_float
 
-    def rotamer_num(self, resi):
-        return self.lib.get_rotamer_num(self.c_data.rotamer_num, resi)
+        # read the number of rotamers for each residue
+        rlib_file = open(rlib_name)
+        self.residue_num = int(rlib_file.readline())
+        self.rotamer_num = [int(x) for x in rlib_file.readline().split()]
+        assert self.residue_num == len(self.rotamer_num)
+        rlib_file.close()
+        print self.rotamer_num
+
+        # build the offset list
+        self.offset = [-1] * (self.residue_num ** 2)
+        s = 0
+
+        # read the energy table
+        elib_file = open(elib_name)
+        self.energy = []
+        assert int(elib_file.readline()) == self.residue_num
+        for line in elib_file:
+            ls = line.split()
+            a = int(ls[0])
+            b = int(ls[1])
+            nums = [float(x) for x in ls[2:]]
+            assert len(nums) == self.rotamer_num[a] * self.rotamer_num[b]
+            self.energy.extend(nums)
+            self.offset[a * self.residue_num + b] = s
+            s += len(nums)
+        elib_file.close()
+
+        #self.rotamer_num_c = (c_int * self.residue_num)(*self.rotamer_num)
+        #self.offset_c = (c_int * len(self.offset))(*self.offset)
+        #self.energy_c = (c_float * len(self.energy))(*self.energy)
 
     def calc_g_delta(self, nodes):
-        c_nodes_p = (c_int * len(nodes)) (*nodes)
-        self.lib.calc_g_delta.restype = c_float
-        c_g_delta = self.lib.calc_g_delta(c_nodes_p, len(nodes), byref(self.c_data))
-        return c_g_delta
+        lib = cdll.LoadLibrary("./utils.so")
+        lib.calc_g_delta.restype = c_float
+        nodes_c = (c_int * len(nodes))(*nodes)
+        rotamer_num_c = (c_int * self.residue_num)(*self.rotamer_num)
+        offset_c = (c_int * len(self.offset))(*self.offset)
+        energy_c = (c_float * len(self.energy))(*self.energy)
+        return lib.calc_g_delta(byref(nodes_c), len(nodes), self.residue_num,
+                                     byref(rotamer_num_c), byref(offset_c), byref(energy_c))
 
     def calc_h(self, nodes):
-        c_nodes_p = (c_int * len(nodes)) (*nodes)
-        self.lib.calc_h.restype = c_float
-        c_h = self.lib.calc_h(c_nodes_p, len(nodes), byref(self.c_data))
-        return c_h
+        lib = cdll.LoadLibrary("./utils.so")
+        lib.calc_h.restype = c_float
+        nodes_c = (c_int * len(nodes))(*nodes)
+        rotamer_num_c = (c_int * self.residue_num)(*self.rotamer_num)
+        offset_c = (c_int * len(self.offset))(*self.offset)
+        energy_c = (c_float * len(self.energy))(*self.energy)
+        nodes_c = (c_int * len(nodes))(*nodes)
+        return lib.calc_h(byref(nodes_c), len(nodes), self.residue_num,
+                               byref(rotamer_num_c), byref(offset_c), byref(energy_c))
