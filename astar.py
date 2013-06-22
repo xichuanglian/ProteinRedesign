@@ -12,15 +12,16 @@ class TreeNode:
 
 def astar_search(num_proc, data, spark_context):
 	def process_prepare(pairs):
-		nodes = []
+		newNodes = []
 		for nodes, old_g in pairs:
-        	g = data.calc_g_delta(nodes) + old_g
-        	h = data.calc_h(nodes)
-        	nodes.append(TreeNode(nodes,g,h))
-		return nodes
+			g = data.calc_g_delta(nodes) + old_g
+			h = data.calc_h(nodes)
+			newNodes.append(TreeNode(nodes,g,h))
 
-    depth = data.residue_num
-    heap = [TreeNode([],0,0)]
+		return newNodes
+
+	depth = data.residue_num
+	heap = [TreeNode([],0,0)]
     ans = []
     ans_value = 1
     while heap[0].g < ans_value:
@@ -51,12 +52,12 @@ def astar_search(num_proc, data, spark_context):
 			for nodes, old_g in prepare:
 				temp.append((nodes, old_g))
 				counter++
-				if counter == subSetSize:
+				if counter == subSetSize-1:
 					prepareNew.append(temp)
 					temp = []
 					counter = 0
 			
-			if not temp
+			if not temp:
 				prepareNew.append(temp)
 			
             prepare_p = spark_context.parallelize(prepareNew)
