@@ -12,5 +12,5 @@ if __name__ == '__main__':
     files = ["dataset.py","astar.py","utils.so"]
     sc = SparkContext(sys.argv[1], "Protein Redesign", pyFiles=files)
     data = Dataset("rotamerLibrary", "energyTable")
-    result = astar.astar_search(1,data,sc)
+    result = astar.astar_search(2,data,sc)
     print result

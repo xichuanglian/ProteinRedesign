@@ -9,7 +9,7 @@ fout.write("%d\n" % num)
 
 rotamerLib = []
 for x in range(0, num):
-    numRot = random.randrange(2,3,1)
+    numRot = random.randrange(2,6,1)
     rotamerLib.append(numRot)
     fout.write("%d " % numRot)
 

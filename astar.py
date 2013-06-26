@@ -11,21 +11,25 @@ class TreeNode:
         return str(self.nodes) + "g:%d h: %d" %(self.g, self.h)
 
 def astar_search(num_proc, data, spark_context):
-    def process_prepare(pair):
-        nodes,old_g = pair
-        g = b_data.value.calc_g_delta(nodes) + old_g
-        h = b_data.value.calc_h(nodes)
-        return TreeNode(nodes,g,h)
+    def process_prepare(pairs):
+        newNodes = []
+        for nodes, old_g in pairs:
+            g = data.calc_g_delta(nodes) + old_g
+            h = data.calc_h(nodes)
+            newNodes.append(TreeNode(nodes,g,h))
+
+        return newNodes
 
     depth = data.residue_num
     heap = [TreeNode([],0,0)]
     ans = []
     ans_value = 1
-    if num_proc > 1:
-        b_data = spark_context.broadcast(data)
     while heap[0].g < ans_value:
         prepare = []
-        while len(prepare) < num_proc and len(heap) > 0:
+        # the old vector prepare is divided into several subsets
+        subSetSize = 50
+
+        while len(prepare) < num_proc * subSetSize and len(heap) > 0:
             current = heapq.heappop(heap)
             if len(current.nodes) >= depth:
                 if current.g < ans_value:
@@ -41,8 +45,24 @@ def astar_search(num_proc, data, spark_context):
                 h = data.calc_h(nodes)
                 heapq.heappush(heap, TreeNode(nodes,g,h))
         else:
-            prepare_p = spark_context.parallelize(prepare)
-            nodes = prepare_p.map(process_prepare).collect()
-            for node in nodes:
-                heapq.heappush(heap, node)
+            # regroup the vector prepare
+            prepareNew = []
+            temp = []
+            counter = 0
+            for nodes, old_g in prepare:
+                temp.append((nodes, old_g))
+                counter += 1
+                if counter == subSetSize:
+                    prepareNew.append(temp)
+                    temp = []
+                    counter = 0
+
+            if temp:
+                prepareNew.append(temp)
+
+            prepare_p = spark_context.parallelize(prepareNew)
+            groupOfNodes = prepare_p.map(process_prepare).collect()
+            for nodes in groupOfNodes:
+                for node in nodes:
+                    heapq.heappush(heap, node)
     return ans
