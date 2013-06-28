@@ -27,7 +27,7 @@ def astar_search(num_proc, data, spark_context):
     while heap[0].g < ans_value:
         prepare = []
         # the old vector prepare is divided into several subsets
-        subSetSize = 50
+        subSetSize = 500
 
         while len(prepare) < num_proc * subSetSize and len(heap) > 0:
             current = heapq.heappop(heap)
