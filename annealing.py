@@ -27,6 +27,8 @@ def split(n_and_b):
     return (l,best)
 
 def accept(new_v,old_v,t):
+    if new_v > 0:
+        return False
     if new_v <= old_v:
         return True
     else:
@@ -44,18 +46,19 @@ def sim_annealing(spark_context,data,core_num):
         data_bc.value.load_library()
         sub_best = ([],0.0)
         t = T
-        min_t = T * 0.8
+        min_t = T * 0.01
         while t > min_t:
-            old_node,old_v = s
-            new_node = old_node[:]
-            ri = random.randrange(data_bc.value.residue_num)
-            new_node[ri] = random.randrange(data_bc.value.rotamer_num[ri])
-            new_v = data_bc.value.calc_energy(new_node)
-            if accept(new_v,old_v,t):
-                s = (new_node,new_v)
-            if new_v < sub_best[1]:
-                sub_best = (new_node,new_v)
-            t *= 0.999
+            for i in range(100):
+		    old_node,old_v = s
+		    new_node = old_node[:]
+		    ri = random.randrange(data_bc.value.residue_num)
+		    new_node[ri] = random.randrange(data_bc.value.rotamer_num[ri])
+		    new_v = data_bc.value.calc_energy(new_node)
+		    if accept(new_v,old_v,t):
+			s = (new_node,new_v)
+		    if new_v < sub_best[1]:
+			sub_best = (new_node,new_v)
+            t *= 0.99
         return (s,sub_best)
 
     n = data.residue_num
@@ -63,9 +66,10 @@ def sim_annealing(spark_context,data,core_num):
     data_bc = spark_context.broadcast(data)
     solution = generate_solution(core_num,data.rotamer_num)
     avg_s = average(solution)
-    best = ([],0.0)
-    T = 10.0
-    while T > 0.5:
+    best = ([],10.0)
+    T = 100.0
+    stable_count = 0
+    while T > 0.001 and stable_count < 10:
         if core_num > 1:
             solution_p = spark_context.parallelize(solution)
             new_s_and_best = solution_p.map(sub_annealing).collect()
@@ -78,7 +82,9 @@ def sim_annealing(spark_context,data,core_num):
             avg_s = new_avg
         if b[1] < best[1]:
             best = b
-        T = T * 0.8
+            stable_count = 0
+        stable_count += 1
+        T = T * 0.6
     return best
 
 if __name__ == '__main__':
