@@ -163,6 +163,6 @@ float calc_energy(const int* rotamers, const int residue_num, const int* rotamer
     int i,j;
     for (i = 0; i < residue_num - 1; ++i)
         for (j = i + 1; j < residue_num; ++j)
-            sum += energy[offset[i * residue_num + j] + rotamers[i] * rotamer_num[i] + rotamers[j]];
+            sum += energy[offset[i * residue_num + j] + rotamers[i] * rotamer_num[j] + rotamers[j]];
     return sum;
 }

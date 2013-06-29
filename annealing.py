@@ -28,7 +28,7 @@ def accept(new_v,old_v,t):
     if new_v <= old_v:
         return True
     else:
-        d = old_v - new_v
+        d = new_v - old_v
         return math.exp(t*d/new_v) < random.random()
 
 def average(s):
@@ -53,7 +53,7 @@ def sim_annealing(spark_context,data,core_num):
                 s = (new_node,new_v)
             if new_v < sub_best[1]:
                 sub_best = (new_node,new_v)
-            t *= 0.98
+            t *= 0.999
         return (s,sub_best)
 
     n = data.residue_num
@@ -61,8 +61,8 @@ def sim_annealing(spark_context,data,core_num):
     solution = generate_solution(core_num,data.rotamer_num)
     avg_s = average(solution)
     best = ([],0.0)
-    T = 100.0
-    while T > 1:
+    T = 10.0
+    while T > 0.5:
         if core_num > 1:
             solution_p = spark_context.parallelize(solution)
             new_s_and_best = solution_p.map(sub_annealing).collect()
@@ -75,7 +75,7 @@ def sim_annealing(spark_context,data,core_num):
             avg_s = new_avg
         if b[1] < best[1]:
             best = b
-        T = T * 0.9
+        T = T * 0.8
     return best
 
 if __name__ == '__main__':
