@@ -31,3 +31,5 @@ float calc_g_delta(const int* rotamers_above, const int d,
 float calc_h(const int* rotamers_above, const int d,
              const int residue_num, const int* rotamer_num,
              const int* offset, const float* energy);
+float calc_energy(const int* rotamers, const int residue_num, const int* rotamer_num,
+                  const int* offset, const float* energy);

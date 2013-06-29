@@ -12,14 +12,16 @@ class TreeNode:
 
 def astar_search(num_proc, data, spark_context):
     def process_prepare(pairs):
+        data_bc.value.load_library()
         newNodes = []
         for nodes, old_g in pairs:
-            g = data.calc_g_delta(nodes) + old_g
-            h = data.calc_h(nodes)
+            g = data_bc.value.calc_g_delta(nodes) + old_g
+            h = data_bc.value.calc_h(nodes)
             newNodes.append(TreeNode(nodes,g,h))
 
         return newNodes
 
+    data_bc = spark_context.broadcast(data)
     depth = data.residue_num
     heap = [TreeNode([],0,0)]
     ans = []
@@ -40,6 +42,7 @@ def astar_search(num_proc, data, spark_context):
                 for rotamer in range(data.rotamer_num[resi]):
                     prepare.append((current.nodes + [rotamer], current.g))
         if num_proc <= 1:
+            data.load_library()
             for nodes,old_g in prepare:
                 g = data.calc_g_delta(nodes) + old_g
                 h = data.calc_h(nodes)
