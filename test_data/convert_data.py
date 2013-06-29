@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import sys
 rotamer_table = open(sys.argv[1])
 energy_table = open(sys.argv[2])

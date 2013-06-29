@@ -41,6 +41,7 @@ class Dataset:
         self.lib = cdll.LoadLibrary("./utils.so")
         self.lib.calc_g_delta.restype = c_float
         self.lib.calc_h.restype = c_float
+        self.lib.calc_energy.restype = c_float
         self.rotamer_num_c = (c_int * self.residue_num)(*self.rotamer_num)
         self.offset_c = (c_int * len(self.offset))(*self.offset)
         self.energy_c = (c_float * len(self.energy))(*self.energy)
@@ -54,3 +55,8 @@ class Dataset:
         nodes_c = (c_int * len(nodes))(*nodes)
         return self.lib.calc_h(byref(nodes_c), len(nodes), self.residue_num,
                                byref(self.rotamer_num_c), byref(self.offset_c), byref(self.energy_c))
+
+    def calc_energy(self, nodes):
+        nodes_c = (c_int * len(nodes))(*nodes)
+        return self.lib.calc_energy(byref(nodes_c), self.residue_num,
+                                    byref(self.rotamer_num_c), byref(self.offset_c), byref(self.energy_c))
