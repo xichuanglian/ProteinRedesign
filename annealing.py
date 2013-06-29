@@ -1,7 +1,9 @@
 import random
 import math
 import time
+import sys
 from dataset import Dataset
+from pyspark import SparkContext
 
 def temperature(t):
     return 0.8 * t
@@ -39,16 +41,16 @@ def average(s):
 
 def sim_annealing(spark_context,data,core_num):
     def sub_annealing(s):
-        data.load_library()
+        data_bc.value.load_library()
         sub_best = ([],0.0)
         t = T
         min_t = T * 0.8
         while t > min_t:
             old_node,old_v = s
             new_node = old_node[:]
-            ri = random.randrange(data.residue_num)
-            new_node[ri] = random.randrange(data.rotamer_num[ri])
-            new_v = data.calc_energy(new_node)
+            ri = random.randrange(data_bc.value.residue_num)
+            new_node[ri] = random.randrange(data_bc.value.rotamer_num[ri])
+            new_v = data_bc.value.calc_energy(new_node)
             if accept(new_v,old_v,t):
                 s = (new_node,new_v)
             if new_v < sub_best[1]:
@@ -58,6 +60,7 @@ def sim_annealing(spark_context,data,core_num):
 
     n = data.residue_num
     rot_n = data.rotamer_num
+    data_bc = spark_context.broadcast(data)
     solution = generate_solution(core_num,data.rotamer_num)
     avg_s = average(solution)
     best = ([],0.0)
@@ -80,8 +83,10 @@ def sim_annealing(spark_context,data,core_num):
 
 if __name__ == '__main__':
     data = Dataset("rotamerLibrary", "energyTable")
+    files = ["dataset.py","utils.so"]
+    sc = SparkContext(sys.argv[1], "Protein Redesign(Simulated Annealing)", pyFiles=files)
     start = time.time()
-    result = sim_annealing(0,data,1)
+    result = sim_annealing(sc,data,int(sys.argv[2]))
     elapsed = time.time() - start
     print result
     print elapsed
