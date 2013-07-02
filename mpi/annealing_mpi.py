@@ -26,6 +26,8 @@ def split(n_and_b):
     return (l,best)
 
 def accept(new_v,old_v,t):
+    if new_v > 0:
+        return False
     if new_v <= old_v:
         return True
     else:
@@ -43,15 +45,16 @@ def sub_annealing(data,s,T):
     t = T
     min_t = T * 0.1
     while t > min_t:
-        old_node,old_v = s
-        new_node = old_node[:]
-        ri = random.randrange(data.residue_num)
-        new_node[ri] = random.randrange(data.rotamer_num[ri])
-        new_v = data.calc_energy(new_node)
-        if accept(new_v,old_v,t):
-            s = (new_node,new_v)
-        if new_v < sub_best[1]:
-            sub_best = (new_node,new_v)
+        for i in range(data.rotamer_sum/10):
+            old_node,old_v = s
+            new_node = old_node[:]
+            ri = random.randrange(data.residue_num)
+            new_node[ri] = random.randrange(data.rotamer_num[ri])
+            new_v = data.calc_energy(new_node)
+            if accept(new_v,old_v,t):
+                s = (new_node,new_v)
+            if new_v < sub_best[1]:
+                sub_best = (new_node,new_v)
         t *= 0.999
     return (s,sub_best)
 

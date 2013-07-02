@@ -10,6 +10,7 @@ class Dataset:
         rlib_file = open(rlib_name)
         self.residue_num = int(rlib_file.readline())
         self.rotamer_num = [int(x) for x in rlib_file.readline().split()]
+        self.rotamer_sum = sum(self.rotamer_num)
         assert self.residue_num == len(self.rotamer_num)
         rlib_file.close()
         # print self.rotamer_num
