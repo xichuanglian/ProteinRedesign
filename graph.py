@@ -1,18 +1,14 @@
 import matplotlib.pyplot as plt  
 
-x = []
-y = []
+x1 = [10, 11, 12, 13, 14, 15]
+y1 = [388, 252, 1111, 1160, 7006, 7078]
 
-a = 0
-b = 1
-for i in range(100):
-    x.append(i)
-    t = b
-    b = a+b
-    a = t
-    y.append(t)
+x2 = [10, 11, 12, 13, 14, 15, 16]
+y2 = [136, 116, 131, 104, 129, 146, 134]
 
-plt.xlabel('tiems')  
-plt.ylabel('numbers')  
-plt.plot(x, y, 'b')  
+plt.xlabel('number of residues')  
+plt.ylabel('running time')  
+plt.plot(x2, y2, 'r')
+#plt.hold
+plt.plot(x1, y1, 'b') 
 plt.show()
