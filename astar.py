@@ -26,6 +26,14 @@ def astar_search(num_proc, data, spark_context):
     heap = [TreeNode([],0,0)]
     ans = []
     ans_value = 1
+    
+    countExpandedNodes = 0
+    totalNumMul = 1
+    totalNum = 0
+    for i in range(data.residu_num):
+        totalNumMul *= data.rotamer_num[i]
+        totalNum += totalNumMul 
+    
     while heap[0].g < ans_value:
         prepare = []
         # the old vector prepare is divided into several subsets
@@ -41,6 +49,8 @@ def astar_search(num_proc, data, spark_context):
                 resi = len(current.nodes)
                 for rotamer in range(data.rotamer_num[resi]):
                     prepare.append((current.nodes + [rotamer], current.g))
+        countExpandedNodes += len(prepare)
+                
         if num_proc <= 1:
             data.load_library()
             for nodes,old_g in prepare:
@@ -68,4 +78,7 @@ def astar_search(num_proc, data, spark_context):
             for nodes in groupOfNodes:
                 for node in nodes:
                     heapq.heappush(heap, node)
+    
+    print "The number of counted nodes: " + countExpandedNodes
+    print "The total number of nodes" + totalNum
     return ans
